@@ -1,0 +1,135 @@
+import java.io.*;
+import java.util.*;
+
+// Câu 1: Xây dựng interface IHinh
+interface IHinh {
+    double tinhDienTich();
+    double tinhChuVi();
+}
+
+// Câu 2: Xây dựng lớp HinhVuong thực hiện Interface IHinh
+class HinhVuong implements IHinh {
+    private double canh;
+
+    public HinhVuong(double canh) {
+        this.canh = canh;
+    }
+
+    @Override
+    public double tinhDienTich() {
+        return canh * canh;
+    }
+
+    @Override
+    public double tinhChuVi() {
+        return 4 * canh;
+    }
+}
+
+// Câu 3: Xây dựng lớp HinhChuNhat thực hiện interface IHinh
+class HinhChuNhat implements IHinh {
+    private double canh1;
+    private double canh2;
+
+    public HinhChuNhat(double canh1, double canh2) {
+        this.canh1 = canh1;
+        this.canh2 = canh2;
+    }
+
+    @Override
+    public double tinhDienTich() {
+        return canh1 * canh2;
+    }
+
+    @Override
+    public double tinhChuVi() {
+        return 2 * (canh1 + canh2);
+    }
+}
+
+// Câu 4: Xây dựng lớp DanhSachHinh để thực hiện các chức năng
+class DanhSachHinh {
+    private List<IHinh> danhSachHinh = new ArrayList<>();
+
+    public void docDuLieuTuFile(String tenFile) {
+        try (BufferedReader br = new BufferedReader(new FileReader(tenFile))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts[0].equals("HinhVuong")) {
+                    double canh = Double.parseDouble(parts[1]);
+                    danhSachHinh.add(new HinhVuong(canh));
+                } else if (parts[0].equals("HinhChuNhat")) {
+                    double canh1 = Double.parseDouble(parts[1]);
+                    double canh2 = Double.parseDouble(parts[2]);
+                    danhSachHinh.add(new HinhChuNhat(canh1, canh2));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void demSoLuongHinh() {
+        int countHinhVuong = 0;
+        int countHinhChuNhat = 0;
+
+        for (IHinh hinh : danhSachHinh) {
+            if (hinh instanceof HinhVuong) {
+                countHinhVuong++;
+            } else if (hinh instanceof HinhChuNhat) {
+                countHinhChuNhat++;
+            }
+        }
+
+        System.out.println("So luong HinhVuong: " + countHinhVuong);
+        System.out.println("So luong HinhChuNhat: " + countHinhChuNhat);
+    }
+
+    public HinhVuong timHinhVuongChuViLonNhat() {
+        HinhVuong hinhVuongMax = null;
+        double maxChuVi = Double.MIN_VALUE;
+
+        for (IHinh hinh : danhSachHinh) {
+            if (hinh instanceof HinhVuong) {
+                double chuVi = hinh.tinhChuVi();
+                if (chuVi > maxChuVi) {
+                    maxChuVi = chuVi;
+                    hinhVuongMax = (HinhVuong) hinh;
+                }
+            }
+        }
+
+        return hinhVuongMax;
+    }
+
+    public void sapXepTheoChuVi() {
+        Collections.sort(danhSachHinh, Comparator.comparingDouble(IHinh::tinhChuVi));
+
+        System.out.println("Danh sach sau khi sap xep theo chu vi:");
+        for (IHinh hinh : danhSachHinh) {
+            System.out.println("Chu vi: " + hinh.tinhChuVi() + ", Dien tich: " + hinh.tinhDienTich());
+        }
+    }
+}
+
+// Main class để kiểm tra
+public class Main {
+    public static void main(String[] args) {
+        DanhSachHinh danhSachHinh = new DanhSachHinh();
+
+        // Câu 4a: Đọc dữ liệu từ file text
+        danhSachHinh.docDuLieuTuFile("duongdanfile.txt");
+
+        // Câu 4b: Đếm số hình của từng loại
+        danhSachHinh.demSoLuongHinh();
+
+        // Câu 4c: Tìm hình vuông có chu vi lớn nhất
+        HinhVuong hinhVuongMax = danhSachHinh.timHinhVuongChuViLonNhat();
+        System.out.println("Hinh vuong co chu vi lon nhat: " + hinhVuongMax.tinhChuVi());
+
+        // Câu 4d: Sắp xếp các hình tăng dần theo chu vi
+        danhSachHinh.sapXepTheoChuVi();
+    }
+}
+
